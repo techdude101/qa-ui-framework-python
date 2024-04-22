@@ -23,21 +23,7 @@ capabilities_firefox = {
 GRID_URL = os.environ.get("GRID_URL")
 
 
-@pytest.fixture(scope="class")
-def driver_init_remote_chrome(request):
-    """Initialise a new Remote Chrome WebDriver"""
-
-    options = webdriver.ChromeOptions()
-    options.set_capability("selenoid:options", capabilities_chrome["selenoid:options"])
-
-    web_driver = webdriver.Remote(command_executor=GRID_URL, options=options)
-
-    request.cls.driver = web_driver
-    yield
-    web_driver.close()
-
-
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def driver_init_chrome(request):
     """Initialise a new Chrome WebDriver"""
     web_driver = None
@@ -59,7 +45,7 @@ def driver_init_chrome(request):
     web_driver.close()
 
 
-@pytest.fixture(scope="class")
+@pytest.fixture(scope="function")
 def driver_init_firefox(request):
     """Initialise a new Firefox WebDriver"""
     web_driver = webdriver.Firefox()
