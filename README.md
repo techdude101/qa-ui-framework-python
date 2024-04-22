@@ -29,3 +29,8 @@ To run tests in parallel with pytest-xdist and Selenium grid
 **Linux**  
 `export GRID_URL=http://grid.example.com:4444/wd/hub`  
 `pytest -n 2`  
+
+To run tests with allure reporting  
+`python -m pytest --alluredir allure-results`  
+
+`allure-2.28.0/bin/allure serve allure-results`  
