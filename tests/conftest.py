@@ -4,6 +4,7 @@ import os
 import pytest
 
 from selenium import webdriver
+from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from webdriver_manager.chrome import ChromeDriverManager
@@ -21,7 +22,7 @@ capabilities_firefox = {
 }
 
 GRID_URL = os.environ.get("GRID_URL")
-
+DEFAULT_WAIT_IN_SECONDS = 10
 
 @pytest.fixture(scope="function")
 def driver_init_chrome(request):
@@ -36,8 +37,7 @@ def driver_init_chrome(request):
         web_driver = webdriver.Remote(command_executor=GRID_URL, options=options)
     else:
         service = ChromeService(ChromeDriverManager().install())
-        # options.add_argument("--headless")
-        options.set_capability("pageLoadStrategy", "eager")
+        options.add_argument("--headless")
         web_driver = webdriver.Chrome(service=service, options=options)
 
     request.cls.driver = web_driver
