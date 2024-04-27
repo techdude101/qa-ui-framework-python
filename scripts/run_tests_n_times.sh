@@ -11,7 +11,7 @@ do
   rm -R allure-results
 
   # 2. Run tests
-  python -m pytest -n 2 --alluredir allure-results
+  python -m pytest -n 2 --alluredir allure-results --browser firefox
 
   # 3. Copy previous history - REPORT HISTORY
   cp -r allure-report/history allure-results

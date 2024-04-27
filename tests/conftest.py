@@ -28,29 +28,31 @@ DEFAULT_WAIT_IN_SECONDS = 10
 
 
 @pytest.fixture(scope="class", autouse=True)
-def setup(request, browser):
+def base_webdriver(web_browser):
+    """Setup method"""
 
     driver = None
 
-    if browser == "chrome":
+    if web_browser == "chrome":
         driver = driver_init_chrome()
-    elif browser == "firefox":
+    elif web_browser == "firefox":
         driver = driver_init_firefox()
 
-    request.cls.driver = driver
-    yield
+    yield driver
     driver.close()
 
 
 @pytest.fixture(scope="class", autouse=True)
-def browser(request):
-    browser = request.config.getoption("--browser")
-    if not browser:
+def web_browser(request):
+    """Get browser from command line argument"""
+    browser_option = request.config.getoption("--browser")
+    if not browser_option:
         return "chrome"
-    return browser
+    return browser_option
 
 
 def pytest_addoption(parser):
+    """Add browser command line argument option"""
     parser.addoption("--browser")
 
 
