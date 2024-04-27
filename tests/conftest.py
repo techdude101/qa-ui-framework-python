@@ -4,10 +4,12 @@ import os
 import pytest
 
 from selenium import webdriver
-from selenium.webdriver.support.wait import WebDriverWait
+
 from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.firefox.service import Service as FirefoxService
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 capabilities_chrome = {
     "browserName": "chrome",
@@ -24,34 +26,52 @@ capabilities_firefox = {
 GRID_URL = os.environ.get("GRID_URL")
 DEFAULT_WAIT_IN_SECONDS = 10
 
-@pytest.fixture(scope="function")
-def driver_init_chrome(request):
+
+@pytest.fixture(scope="class", autouse=True)
+def setup(request, browser):
+
+    driver = None
+
+    if browser == "chrome":
+        driver = driver_init_chrome()
+    elif browser == "firefox":
+        driver = driver_init_firefox()
+
+    request.cls.driver = driver
+    yield
+    driver.close()
+
+
+@pytest.fixture(scope="class", autouse=True)
+def browser(request):
+    browser = request.config.getoption("--browser")
+    if not browser:
+        return "chrome"
+    return browser
+
+
+def pytest_addoption(parser):
+    parser.addoption("--browser")
+
+
+def driver_init_chrome():
     """Initialise a new Chrome WebDriver"""
-    web_driver = None
+    webdriver_chrome = None
 
     options = ChromeOptions()
 
     if GRID_URL:
         options.set_capability("selenoid:options", capabilities_chrome["selenoid:options"])
 
-        web_driver = webdriver.Remote(command_executor=GRID_URL, options=options)
+        webdriver_chrome = webdriver.Remote(command_executor=GRID_URL, options=options)
     else:
         service = ChromeService(ChromeDriverManager().install())
-        options.add_argument("--headless")
-        web_driver = webdriver.Chrome(service=service, options=options)
-
-    request.cls.driver = web_driver
-    yield
-    web_driver.close()
+        # options.add_argument("--headless")
+        webdriver_chrome = webdriver.Chrome(service=service, options=options)
+    return webdriver_chrome
 
 
-@pytest.fixture(scope="function")
-def driver_init_firefox(request):
+def driver_init_firefox():
     """Initialise a new Firefox WebDriver"""
-    web_driver = webdriver.Firefox()
-
-    request.cls.driver = web_driver
-
-    yield
-
-    web_driver.close()
+    driver = webdriver.Firefox(service=FirefoxService(GeckoDriverManager().install()))
+    return driver
